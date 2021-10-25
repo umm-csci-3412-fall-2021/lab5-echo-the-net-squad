@@ -10,28 +10,33 @@ public class EchoServer {
     public static void main(String[] args) {
         try {
             // Start listening on the specified port
-            ServerSocket sock = new ServerSocket(portNumber);
+            ServerSocket socket = new ServerSocket(portNumber);
 
             // Run forever, which is common for server style services
             while (true) {
                 // Wait until someone connects, thereby requesting a date
-                Socket client = sock.accept();
+                Socket client = socket.accept();
                 System.out.println("Got a request!");
 
-                // Get the input stream so we can read from that socket
-                BufferedReader clientStream = new BufferedReader(new InputStreamReader(System.in));
-                //for testing
-                System.out.println(clientStream);
+                //Object that gets input from the client
+                InputStream clientInput = client.getInputStream();
+                //Object that sends output to the client
+                OutputStream clientOutput = client.getOutputStream();
 
-                // Construct a writer so we can write to the socket, thereby
-                // sending something back to the client.
-                PrintWriter writer = new PrintWriter(client.getOutputStream(), true);
+                //Buffer size of client input
+                byte[] bufferSize = new byte[1024];
+                int bytesRead;
 
-                // Send the input back to the client.
-                writer.println(clientStream.toString());
+                // Read data sent by client socket
+                while ((bytesRead = clientInput.read(bufferSize)) != -1) {
+                    // Write data back to client
+                    clientOutput.write(bufferSize, 0, bytesRead);
+                    clientOutput.flush();
+                }
 
+                //TODO: Close the socket via client
                 // Close the client socket since we're done.
-                client.close();
+                socket.close();
             }
             // *Very* minimal error handling.
         } catch (IOException ioe) {
