@@ -18,23 +18,26 @@ public class EchoServer {
                 Socket client = socket.accept();
                 System.out.println("Got a request!");
 
-                //Object that gets input from the client
+                // Helpful guide here:
+                // https://stackoverflow.com/questions/1830698/what-is-inputstream-output-stream-why-and-when-do-we-use-them
+                // Object that gets input from the client
                 InputStream clientInput = client.getInputStream();
-                //Object that sends output to the client
+                // Object that sends output to the client
                 OutputStream clientOutput = client.getOutputStream();
 
-                //Buffer size of client input
+                // Buffer size of client input
                 byte[] bufferSize = new byte[1024];
                 int bytesRead;
 
                 // Read data sent by client socket
                 while ((bytesRead = clientInput.read(bufferSize)) != -1) {
-                    // Write data back to client
+                    // Send data back to client console
                     clientOutput.write(bufferSize, 0, bytesRead);
+                    // Clear buffer
                     clientOutput.flush();
                 }
 
-                //TODO: Close the socket via client
+                // TODO: Close the socket via client
                 // Close the client socket since we're done.
                 socket.close();
             }
