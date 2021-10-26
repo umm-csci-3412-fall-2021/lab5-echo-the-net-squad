@@ -16,29 +16,41 @@ public class EchoClient {
         }
 
         try {
-            // Connect to the server
+            // Create socket
             Socket socket = new Socket(server, portNumber);
 
-            // Get the input stream so we can read from that socket
-            InputStream input = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            // Helpful guide here:
+            // https://stackoverflow.com/questions/1830698/what-is-inputstream-output-stream-why-and-when-do-we-use-them
+            // Object that gets input from the server
+            InputStream receiveServerInput = socket.getInputStream();
+            // Object that sends output to the server
+            OutputStream sendServerOutput = socket.getOutputStream();
 
-            int userInput = System.in.read();
+            byte[] buffer = new byte[1024];
+            int bufferSize;
 
-            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            // Read data in from user input
+            while ((bufferSize = System.in.read(buffer)) != -1) {
 
-            // Send the input back to the client.
-            writer.println(userInput);
+                // Send data to server
+                sendServerOutput.write(buffer, 0, bufferSize);
+                // Clear buffer
+                sendServerOutput.flush();
 
-            // Writes string to the file
-            //output.write(data);
-
-            // Print all the input we receive from the server
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                // Receive data from server and write it to the console
+                bufferSize = receiveServerInput.read(buffer);
+                System.out.write(buffer, 0, bufferSize);
+                System.out.flush();
             }
 
+            // Tell server we won't be sending anymore output
+            socket.shutdownOutput();
+
+            // Read whatever data the server has left
+            while ((bufferSize = receiveServerInput.read(buffer)) != -1) {
+                System.out.write(buffer, 0, bufferSize);
+                System.out.flush();
+            }
             // Close the socket when we're done reading from it
             socket.close();
 
